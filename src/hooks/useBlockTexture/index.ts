@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useLoader } from '@react-three/fiber'
 import { TextureLoader } from 'three/src/loaders/TextureLoader'
-import { NearestFilter } from 'three';
+import { LinearMipMapLinearFilter, NearestFilter } from 'three';
 
 import textureUrl from './textureatlas.png';
 
@@ -10,7 +10,7 @@ const useBlockTexture = () => {
 
     useEffect(() => {
         blockTexture.magFilter = NearestFilter;
-        blockTexture.minFilter = NearestFilter;
+        blockTexture.minFilter = LinearMipMapLinearFilter;
     }, [blockTexture]);
 
     return { blockTexture };
