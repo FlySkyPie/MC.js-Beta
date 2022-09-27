@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { DoubleSide } from 'three';
 
 import { useBlockTexture } from '@/hooks/useBlockTexture';
 
 import { useChunkData } from "./useChunkData";
-import { useChunkMesh } from './useChunkMesh';
+import { useGeometries } from './useGeometries';
 
 
 
@@ -16,29 +16,42 @@ type IProps = {
 
 const Chunk: React.FC<IProps> = ({ cx, cy = 0, cz }) => {
     const { elevation, voxels } = useChunkData({ cx, cy, cz });
-    const { geometry, t_geometry } = useChunkMesh({ elevation, voxels, cx, cy, cz });
+    const geometries = useGeometries({ voxels, cx, cy, cz });
     const { blockTexture } = useBlockTexture();
+
+    const meshRef = useRef(null);
+
+    if (geometries === undefined) {
+        return null;
+    }
 
     return (
         <>
-            <mesh geometry={geometry} >
-                <meshPhongMaterial
+            <mesh ref={meshRef} geometry={geometries.geometry} >
+                {/* <meshPhongMaterial
                     map={blockTexture}
                     transparent
                     needsUpdate
                     alphaTest={0.5}
+                /> */}
+                <meshLambertMaterial
+                    map={blockTexture}
+                    transparent
+                    needsUpdate
+                    alphaTest={0.5}
+
                 />
-     
+
             </mesh>
-            <mesh geometry={t_geometry} >
-                <meshPhongMaterial
+            {/* <mesh geometry={t_geometry} >
+                <meshLambertMaterial
                     map={blockTexture}
                     transparent
                     needsUpdate
                     side={DoubleSide}
                     opacity={1}
                 />
-            </mesh>
+            </mesh> */}
         </>
     );;
 }
