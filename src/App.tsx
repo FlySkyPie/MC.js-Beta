@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react'
 import { Canvas, MeshProps, useFrame } from '@react-three/fiber';
-import { MapControls, Sky } from '@react-three/drei';
+import { MapControls, } from '@react-three/drei';
 
-import { TimedSky } from './components';
+import { TimedSky, VoxelTerrain } from './components';
+import { GameCore } from './core/GameCore';
 
 function Box(props: MeshProps) {
   // This reference gives us direct access to the THREE.Mesh object
@@ -31,16 +32,23 @@ function App() {
   const [count, setCount] = useState(0)
 
   return (
-    <Canvas gl={{ preserveDrawingBuffer: true }}>
-      {/* <Sky distance={450000} sunPosition={[0, 1, 0]} inclination={0} azimuth={0.25} /> */}
-      <TimedSky />
-      <ambientLight />
-      <pointLight position={[10, 10, 10]} />
-      <Box position={[-1.2, 0, 0]} />
-      <Box position={[1.2, 0, 0]} />
-      <gridHelper />
-      <MapControls />
-    </Canvas>
+    <>
+      <GameCore />
+      <Canvas gl={{ preserveDrawingBuffer: true }}
+      linear
+        camera={{ position: [0, 100, 0] }}>
+        {/* <Sky distance={450000} sunPosition={[0, 1, 0]} inclination={0} azimuth={0.25} /> */}
+        <TimedSky />
+        <ambientLight color={"0xffffff"} intensity={0.5} />
+        {/* <pointLight position={[10, 10, 10]} /> */}
+        <directionalLight color={"0xffffff"} intensity={0.5} />
+        <Box position={[-1.2, 0, 0]} />
+        <Box position={[1.2, 0, 0]} />
+        <VoxelTerrain />
+        <gridHelper />
+        <MapControls />
+      </Canvas>
+    </>
   )
 }
 
