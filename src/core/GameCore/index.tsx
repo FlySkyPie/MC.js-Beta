@@ -1,15 +1,17 @@
-
-import { useEntityComponent } from '@/core/useEntityComponent';
 import { useEffect } from 'react';
 
-import { useSystems } from '../Systems';
+import { useEntityComponent } from '@/core/useEntityComponent';
+import { ISystem } from '@/interface/system';
 
 const TickPerSecond = 20;
 const Delay = 1000 / TickPerSecond; //millisecond
 
-const GameCore: React.FC = () => {
+type IProps = {
+    systems: ISystem[];
+};
+
+const GameCore: React.FC<IProps> = ({ systems }) => {
     const { update } = useEntityComponent();
-    const { systems } = useSystems();
 
     useEffect(() => {
         let lastTime: number = performance.now();

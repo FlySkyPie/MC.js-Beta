@@ -1,17 +1,18 @@
 import React from 'react'
 import { Canvas, } from '@react-three/fiber';
 import { MapControls, } from '@react-three/drei';
+import { Color } from 'three';
 
 import { TimedSky, VoxelTerrain } from './components';
 import { GameCore } from './core/GameCore';
-import { Color } from 'three';
-
-
+import { useSystems } from './systems';
 
 const App: React.FC = () => {
+  const { systems } = useSystems();
+
   return (
     <>
-      <GameCore />
+      <GameCore systems={systems} />
       <Canvas gl={{ preserveDrawingBuffer: true, antialias: false }}
         linear
         camera={{ position: [0, 100, 0] }}>

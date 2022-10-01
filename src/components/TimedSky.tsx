@@ -1,19 +1,18 @@
 import * as React from 'react'
-import { useFrame } from '@react-three/fiber'
 import { Sky, } from '@react-three/drei';
 import { Vector3 } from 'three';
 
+import { useEntityComponent } from '@/core/useEntityComponent';
 
-const TimedSky = () => {
-    const [sunVec, setSunVec] = React.useState(new Vector3(1, 0, 0))
-    useFrame(() => {
-        setSunVec((prev) => {
-            var axis = new Vector3(0, 0, 1);
-            var angle = Math.PI * 0.01;
+export const TimedSky = () => {
+    const { entities } = useEntityComponent();
 
-            return prev.clone().applyAxisAngle(axis, angle);
-        })
-    })
+    const sunVec = React.useMemo(() => {
+        const pos = new Vector3(1, 0, 0);
+        const axis = new Vector3(0, 0, 1);
+        const angle = entities.gametime / 24000 * 2 * Math.PI;
+        return pos.applyAxisAngle(axis, angle)
+    }, [entities.gametime]);
 
     return (
         <Sky
@@ -24,5 +23,4 @@ const TimedSky = () => {
             mieDirectionalG={0.8}
             sunPosition={sunVec} />
     )
-}
-export { TimedSky };
+};
