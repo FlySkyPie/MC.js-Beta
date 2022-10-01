@@ -28,32 +28,25 @@ const Chunk: React.FC<IProps> = ({ cx, cy = 0, cz }) => {
     return (
         <>
             <mesh ref={meshRef} geometry={geometries.geometry} >
-                {/* <meshPhongMaterial
+                <meshPhongMaterial
                     map={blockTexture}
-                    transparent
+                    transparent={false}
+                    depthTest
                     needsUpdate
                     alphaTest={0.5}
-                /> */}
-                <meshLambertMaterial
-                    map={blockTexture}
-                    transparent
-                    needsUpdate
-                    alphaTest={0.5}
-
                 />
-
             </mesh>
-            {/* <mesh geometry={t_geometry} >
-                <meshLambertMaterial
+            <mesh geometry={geometries.t_geometry} >
+                <meshPhongMaterial
                     map={blockTexture}
                     transparent
                     needsUpdate
                     side={DoubleSide}
                     opacity={1}
                 />
-            </mesh> */}
+            </mesh>
         </>
-    );;
+    );
 }
 
 export { Chunk };
