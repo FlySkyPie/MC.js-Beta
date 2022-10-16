@@ -1,5 +1,3 @@
-
-
 import { IEntities } from '@/interface/entities';
 import { IGenericEvent } from '@/interface/events';
 import type { ISystem } from '@/interface/system';

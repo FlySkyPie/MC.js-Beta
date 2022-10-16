@@ -28,7 +28,7 @@ type IUseEntityComponent = UseBoundStore<IEntityComponent, StoreApi<IEntityCompo
 
 const useEntityComponent = create<InternalEntityComponent>((set) => ({
   entities: {
-    explorers: [],
+    explorers: [{ x: 0, y: 0, z: 0 }],
     gametime: 0
   },
   events: [],

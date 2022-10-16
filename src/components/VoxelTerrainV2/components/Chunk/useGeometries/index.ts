@@ -21,13 +21,10 @@ const calculateVoxelIndex = (cx: number, cz: number) => (x: number, y: number, z
     return index;
 }
 
-let count = 0;
-
 const genGeometries =
     async (voxels: VoxelType[], cx: number, cy: number, cz: number) => {
-        //console.log('count', count++);
         const taskId = nanoid();
-        //console.time(`genGeometries()-${taskId}`);
+        console.time(`genGeometries()-${taskId}`);
         const getVoxel = (x: number, y: number, z: number) => {
             const index = calculateVoxelIndex(cx, cz)(x, y, z);
             if (index === null) {
@@ -91,7 +88,20 @@ const genGeometries =
         const geometry = new BufferGeometry();
         const t_geometry = new BufferGeometry();
 
-        //console.time(`generate geometries-${taskId}`);
+        console.time(`generate voxels-${taskId}`);
+        for (let y = 0; y < WorldConstants.WORLD_HEIGHT; ++y) {
+            var vy = cy * WorldConstants.CHUNK_SIZE + y;
+            for (let z = 0; z < WorldConstants.CHUNK_SIZE; ++z) {
+                var vz = cz * WorldConstants.CHUNK_SIZE + z;
+                for (let x = 0; x < WorldConstants.CHUNK_SIZE; ++x) {
+                    var vx = cx * WorldConstants.CHUNK_SIZE + x;
+                    const voxel = getVoxel(vx, vy, vz);
+                }
+            }
+        }
+        console.timeEnd(`generate voxels-${taskId}`);
+
+        console.time(`generate geometries-${taskId}`);
 
         // console.log("BEGIN: " + cx + "," + cz + " " + performance.now())
         for (let y = 0; y < WorldConstants.WORLD_HEIGHT; ++y) {
@@ -177,7 +187,7 @@ const genGeometries =
             }
         }
 
-        //console.timeEnd(`generate geometries-${taskId}`);
+        console.timeEnd(`generate geometries-${taskId}`);
 
         // console.log("END: " + cx + "," + cz + " " + performance.now())
 
@@ -202,7 +212,7 @@ const genGeometries =
         const size = t_positions.length / 3;
         t_geometry.setIndex(t_indices.filter(v => v < size));
 
-        //console.timeEnd(`genGeometries()-${taskId}`);
+        console.timeEnd(`genGeometries()-${taskId}`);
 
         return { geometry, t_geometry };
     };

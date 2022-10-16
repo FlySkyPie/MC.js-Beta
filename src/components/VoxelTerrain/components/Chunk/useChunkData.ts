@@ -2,6 +2,7 @@ import { useMemo } from "react";
 
 import { useSimplexNoise } from "@/contexts/SimplexNoiseContext";
 import { BLOCK_TYPES, VoxelType, WorldConstants } from "@/utils/worldConstants";
+import { nanoid } from "nanoid";
 
 
 const freq = WorldConstants.DEFAULT_FREQUENCY;
@@ -51,6 +52,7 @@ type IProps = {
 const useChunkData = ({ cx, cy, cz }: IProps) => {
     const { simplex } = useSimplexNoise();
     const { elevation, voxels } = useMemo(() => {
+        const taskId = nanoid();
         const voxels: VoxelType[] = new Array(WorldConstants.CHUNK_SIZE * WorldConstants.CHUNK_SIZE * WorldConstants.WORLD_HEIGHT);
         const elevation: number[] = new Array(WorldConstants.CHUNK_SIZE * WorldConstants.CHUNK_SIZE);
 
@@ -62,6 +64,12 @@ const useChunkData = ({ cx, cy, cz }: IProps) => {
             voxels[index] = type;
         }
 
+        //console.time(`useChunkData()-${taskId}`);
+        for (let x = 0; x < WorldConstants.CHUNK_SIZE; x++) {
+            for (let z = 0; z < WorldConstants.CHUNK_SIZE; z++) {
+
+            }
+        }
         // https://www.redblobgames.com/maps/terrain-from-noise/
         for (let x = 0; x < WorldConstants.CHUNK_SIZE; x++) {
             for (let z = 0; z < WorldConstants.CHUNK_SIZE; z++) {
@@ -104,6 +112,8 @@ const useChunkData = ({ cx, cy, cz }: IProps) => {
                 }
             }
         }
+
+        //console.timeEnd(`useChunkData()-${taskId}`);
         return { voxels, elevation };
     }, [cx, cy, cz]);
 

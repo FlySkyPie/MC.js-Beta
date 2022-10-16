@@ -32,8 +32,9 @@ export const VoxelTerrain: React.FC = () => {
 
     return (
         <>
-            {renderChunks.map(item =>
-                <Chunk key={item.key} cx={item.cx} cz={item.cz} />)}
+            {/* {renderChunks.map(item =>
+                <Chunk key={item.key} cx={item.cx} cz={item.cz} />)} */}
+            <Chunk cx={0} cy={0} cz={0} />
         </>
     );
 }

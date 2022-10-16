@@ -3,7 +3,8 @@ import { Canvas, } from '@react-three/fiber';
 import { MapControls, } from '@react-three/drei';
 import { Color } from 'three';
 
-import { TimedSky, VoxelTerrain } from './components';
+import { TimedSky, } from './components';
+import { VoxelTerrain } from './components/VoxelTerrainV2';
 import { GameCore } from './core/GameCore';
 import { useSystems } from './systems';
 

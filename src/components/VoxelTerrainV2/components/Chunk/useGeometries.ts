@@ -1,82 +1,60 @@
-import { startTransition, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { BufferAttribute, BufferGeometry } from "three";
 import { nanoid } from 'nanoid'
 
-import { BLOCK_TYPES, VoxelType, VOXEL_FACES, WorldConstants, } from "@/utils/worldConstants";
+import { VOXEL_FACES, WorldConstants, } from "@/utils/worldConstants";
+import { BlockEnum, convertBlockType2TextureId } from '@/utils/BlockTable';
+import { convertLocalPosition2ArrayIndex, CHUNK_SIZE } from '@/utils/Chunk';
+import { IChunkData } from '@/interface/chunks';
+
 
 const TILE_SIZE = 16;
 const TILE_TEXTURE_WIDTH = 256;
 const TILE_TEXTURE_HEIGHT = 64;
 
-const calculateVoxelIndex = (cx: number, cz: number) => (x: number, y: number, z: number) => {
-    var vx = x - WorldConstants.CHUNK_SIZE * cx;
-    var vy = y;
-    var vz = z - WorldConstants.CHUNK_SIZE * cz;
-
-    if (vx < 0 || vy < 0 || vz < 0 || vx >= WorldConstants.CHUNK_SIZE || vz >= WorldConstants.CHUNK_SIZE) {
-        return null;
-    }
-
-    var index = vx + vz * WorldConstants.CHUNK_SIZE + vy * WorldConstants.CHUNK_SIZE * WorldConstants.CHUNK_SIZE;
-    return index;
-}
-
-let count = 0;
-
 const genGeometries =
-    async (voxels: VoxelType[], cx: number, cy: number, cz: number) => {
-        //console.log('count', count++);
+    async (voxels: Uint32Array, cx: number, cy: number, cz: number) => {
         const taskId = nanoid();
-        //console.time(`genGeometries()-${taskId}`);
-        const getVoxel = (x: number, y: number, z: number) => {
-            const index = calculateVoxelIndex(cx, cz)(x, y, z);
-            if (index === null) {
-                return undefined;
-            }
-            return voxels[index];
-        };
+        console.time(`genGeometries()-${taskId}`);
 
-
-        const doesNeighborVoxelExist = (x: number, y: number, z: number, voxel: VoxelType) => {
-            var vx = x - WorldConstants.CHUNK_SIZE * cx;
-            var vy = y % WorldConstants.WORLD_HEIGHT;
-            var vz = z - WorldConstants.CHUNK_SIZE * cz;
+        const doesNeighborVoxelExist = (x: number, y: number, z: number, type: BlockEnum) => {
+            var localX = x - WorldConstants.CHUNK_SIZE * cx;
+            var localY = y % WorldConstants.CHUNK_SIZE;
+            var localZ = z - WorldConstants.CHUNK_SIZE * cz;
 
             // return voxel value if voxel lies within chunk border
-            if (vx >= 0 && vx < WorldConstants.CHUNK_SIZE && vy >= 0 && vz >= 0 && vz < WorldConstants.CHUNK_SIZE) {
-                const neighbor = getVoxel(x, y, z);
-                if (voxel !== BLOCK_TYPES.WATER && neighbor === BLOCK_TYPES.WATER)
+            if (localX >= 0 && localX < WorldConstants.CHUNK_SIZE && localY >= 0 && localZ >= 0 && localZ < WorldConstants.CHUNK_SIZE) {
+                const neighbor = voxels[convertLocalPosition2ArrayIndex(localX, localY, localZ)];
+                if (type !== BlockEnum.Water && neighbor === BlockEnum.Water)
                     return null;
 
-                if (voxel !== BLOCK_TYPES.LEAVES && neighbor === BLOCK_TYPES.LEAVES)
+                if (type !== BlockEnum.Leaves && neighbor === BlockEnum.Leaves)
                     return null;
                 return neighbor;
             }
 
             // return bottom voxel negative y
-            if (vy < 0) {
-                return getVoxel(x, 0, z);
+            if (localY < 0) {
+                return voxels[convertLocalPosition2ArrayIndex(localX, 0, localZ)];;
             }
 
-            if (vy > WorldConstants.WORLD_HEIGHT) return null;
+            if (localY > WorldConstants.CHUNK_SIZE) return null;
 
             // chunk neighbor checking
             var neighbor = null;
 
             // check if voxel in chunk neighbor exists
-
             if (neighbor != null) {
-                if (voxel !== BLOCK_TYPES.WATER && neighbor === BLOCK_TYPES.WATER)
+                if (type !== BlockEnum.Water && neighbor === BlockEnum.Water)
                     return null;
 
-                if (neighbor === BLOCK_TYPES.LEAVES) return null;
+                if (neighbor === BlockEnum.Leaves) return null;
 
                 return neighbor;
             }
 
             return true;
         }
-
 
         const positions = [];
         const normals = [];
@@ -91,16 +69,16 @@ const genGeometries =
         const geometry = new BufferGeometry();
         const t_geometry = new BufferGeometry();
 
-        //console.time(`generate geometries-${taskId}`);
+        console.time(`generate geometries-${taskId}`);
 
         // console.log("BEGIN: " + cx + "," + cz + " " + performance.now())
-        for (let y = 0; y < WorldConstants.WORLD_HEIGHT; ++y) {
-            var vy = cy * WorldConstants.CHUNK_SIZE + y;
-            for (let z = 0; z < WorldConstants.CHUNK_SIZE; ++z) {
-                var vz = cz * WorldConstants.CHUNK_SIZE + z;
-                for (let x = 0; x < WorldConstants.CHUNK_SIZE; ++x) {
-                    var vx = cx * WorldConstants.CHUNK_SIZE + x;
-                    const voxel = getVoxel(vx, vy, vz);
+        for (let y = 0; y < CHUNK_SIZE; ++y) {
+            var vy = cy * CHUNK_SIZE + y;
+            for (let z = 0; z < CHUNK_SIZE; ++z) {
+                var vz = cz * CHUNK_SIZE + z;
+                for (let x = 0; x < CHUNK_SIZE; ++x) {
+                    var vx = cx * CHUNK_SIZE + x;
+                    const voxel = voxels[convertLocalPosition2ArrayIndex(x, y, z)];
 
                     // get neighbors of current voxel if it exists
                     if (voxel) {
@@ -115,12 +93,12 @@ const genGeometries =
 
                                 //add to arrays for BufferGeometry
                                 for (const { pos, uv } of vertices) {
-                                    if (!voxel.isTransparent) {
+                                    if ((voxel & 0x000000ff) === 0x000000ff) {
                                         positions.push(vx + pos[0], vy + pos[1], vz + pos[2]);
 
                                         normals.push(...dir);
                                         uvs.push(
-                                            ((voxel.id + uv[0]) * TILE_SIZE) /
+                                            ((convertBlockType2TextureId(voxel) + uv[0]) * TILE_SIZE) /
                                             TILE_TEXTURE_WIDTH,
                                             1 -
                                             ((uvRow + 1 - uv[1]) * TILE_SIZE) /
@@ -129,7 +107,7 @@ const genGeometries =
                                         continue;
                                     }
 
-                                    if (voxel === BLOCK_TYPES.WATER) {
+                                    if (voxel === BlockEnum.Water) {
                                         t_positions.push(vx + pos[0], vy + pos[1] - 0.1, vz + pos[2]);
                                     } else {
                                         t_positions.push(vx + pos[0], vy + pos[1], vz + pos[2]);
@@ -137,7 +115,7 @@ const genGeometries =
 
                                     t_normals.push(...dir);
                                     t_uvs.push(
-                                        ((voxel.id + uv[0]) * TILE_SIZE) /
+                                        ((convertBlockType2TextureId(voxel) + uv[0]) * TILE_SIZE) /
                                         TILE_TEXTURE_WIDTH,
                                         1 -
                                         ((uvRow + 1 - uv[1]) * TILE_SIZE) /
@@ -164,8 +142,8 @@ const genGeometries =
                                     */
 
                                 if (
-                                    voxel !== BLOCK_TYPES.WATER &&
-                                    voxel !== BLOCK_TYPES.LEAVES
+                                    voxel !== BlockEnum.Water &&
+                                    voxel !== BlockEnum.Leaves
                                 ) {
                                     indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
                                 }
@@ -177,7 +155,7 @@ const genGeometries =
             }
         }
 
-        //console.timeEnd(`generate geometries-${taskId}`);
+        console.timeEnd(`generate geometries-${taskId}`);
 
         // console.log("END: " + cx + "," + cz + " " + performance.now())
 
@@ -202,31 +180,24 @@ const genGeometries =
         const size = t_positions.length / 3;
         t_geometry.setIndex(t_indices.filter(v => v < size));
 
-        //console.timeEnd(`genGeometries()-${taskId}`);
+        console.timeEnd(`genGeometries()-${taskId}`);
 
         return { geometry, t_geometry };
     };
 
 type IProps = {
-    voxels: VoxelType[],
-    cx: number,
-    cy: number,
-    cz: number
+    data: IChunkData;
 };
 
-export const useGeometries = ({ voxels, cx, cy, cz, }: IProps) => {
+export const useGeometries = ({ data, }: IProps) => {
     const [geometries, setGeometries] = useState<{ geometry: BufferGeometry, t_geometry: BufferGeometry }>();
 
     useEffect(() => {
-        genGeometries(voxels, cx, cy, cz).then(item => {
-            startTransition(() => {
-                setGeometries(item);
-            });
-
+        const { x, y, z } = data.position;
+        genGeometries(data.voxels, x, y, z).then(item => {
+            setGeometries(item);
         })
-    }, [voxels, cx, cy, cz,]);
-
-
+    }, [data]);
 
 
     return geometries;
