@@ -16,17 +16,13 @@ type IProps = {
     down?: IChunkData;
 };
 
-export const useGeometries = ({ data, }: IProps) => {
+export const useGeometries = ({ data, down, east, north, south, up, west }: IProps) => {
     const [geometries, setGeometries] = useState<{ geometry: BufferGeometry, t_geometry: BufferGeometry }>();
 
     useEffect(() => {
-        const { x, y, z } = data.position;
-        genGeometries(data.voxels, x, y, z).then(item => {
-            setGeometries(item);
-        })
-    }, [data]);
-
+        const item = genGeometries({ data, down, east, north, south, up, west });
+        setGeometries(item);
+    }, [data, down, east, north, south, up, west]);
 
     return geometries;
-}
-
+};

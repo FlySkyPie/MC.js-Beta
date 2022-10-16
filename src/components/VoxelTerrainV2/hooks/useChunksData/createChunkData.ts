@@ -32,9 +32,10 @@ export function createChunkData(cx: number, cy: number, cz: number, simplex: Noi
     const elevation = new Int32Array(CHUNK_SIZE * CHUNK_SIZE);
 
     for (let z = 0; z < CHUNK_SIZE; z++) {
+        const vz = cz * CHUNK_SIZE + z;
+
         for (let x = 0; x < CHUNK_SIZE; x++) {
             const vx = cx * CHUNK_SIZE + x;
-            const vz = cz * CHUNK_SIZE + z;
 
             // get height from simplex noise heightmap
             var e = 0;
@@ -62,11 +63,13 @@ export function createChunkData(cx: number, cy: number, cz: number, simplex: Noi
              * @todo Add water
              */
             // add water on land
-            // if (altitude <= OCEAN_HEIGHT) {
-            //     for (let y = altitude; y <= OCEAN_HEIGHT; y++) {
-            //         voxels[convertLocalPosition2ArrayIndex(x, y, z)] = BlockEnum.Water;
-            //     }
-            // }
+            if (altitude <= OCEAN_HEIGHT &&
+                OCEAN_HEIGHT >= cy * CHUNK_SIZE &&
+                OCEAN_HEIGHT < (cy + 1) * CHUNK_SIZE) {
+                for (let y = altitude; y <= OCEAN_HEIGHT; y++) {
+                    voxels[convertLocalPosition2ArrayIndex(x, y, z)] = BlockEnum.Water;
+                }
+            }
         }
     }
 
