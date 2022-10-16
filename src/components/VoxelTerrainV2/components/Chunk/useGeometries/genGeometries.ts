@@ -41,7 +41,7 @@ type IMatrixlizeDataParams = {
 export const matrixlizeData = ({ data, down, east, north, south, up, west }: IMatrixlizeDataParams): IMatrixData => [
     [
         [undefined, undefined, undefined],
-        [undefined, north?.voxels, undefined],
+        [undefined, south?.voxels, undefined],
         [undefined, undefined, undefined],
     ], [
         [undefined, down?.voxels, undefined],
@@ -49,7 +49,7 @@ export const matrixlizeData = ({ data, down, east, north, south, up, west }: IMa
         [undefined, up?.voxels, undefined],
     ], [
         [undefined, undefined, undefined],
-        [undefined, south?.voxels, undefined],
+        [undefined, north?.voxels, undefined],
         [undefined, undefined, undefined],
     ],
 ];
@@ -58,19 +58,19 @@ type RelatedChunkDirection = [1 | 0 | -1, 1 | 0 | -1, 1 | 0 | -1];
 const createRelatedChunkDirectionGetter = (baseX: number, baseY: number, baseZ: number,) =>
     (x: number, y: number, z: number) => {
         const value: RelatedChunkDirection = [0, 0, 0];
-        if (x >= baseX) {
+        if (x >= baseX + CHUNK_SIZE) {
             value[0] = 1;
         } else if (x < baseX) {
             value[0] = -1;
         }
 
-        if (y >= baseY) {
+        if (y >= baseY + CHUNK_SIZE) {
             value[1] = 1;
         } else if (y < baseY) {
             value[1] = -1;
         }
 
-        if (z >= baseZ) {
+        if (z >= baseZ + CHUNK_SIZE) {
             value[2] = 1;
         } else if (z < baseZ) {
             value[2] = -1;
@@ -90,6 +90,7 @@ const createVoxelGetter =
             const localY = vy - baseY;
             const localZ = vz - baseZ;
 
+            // return voxel value if voxel lies within chunk border
             if (localX >= 0 && localX < CHUNK_SIZE &&
                 localY >= 0 && localY < CHUNK_SIZE &&
                 localZ >= 0 && localZ < CHUNK_SIZE) {
@@ -110,38 +111,21 @@ const createVoxelGetter =
                 return null;
             }
 
-
             const neighbor = neighborChunk[convertLocalPosition2ArrayIndex(localX, localY, localZ)];
 
-            // return voxel value if voxel lies within chunk border
-            if (localX >= 0 && localX < CHUNK_SIZE &&
-                localY >= 0 && localY < CHUNK_SIZE &&
-                localZ >= 0 && localZ < CHUNK_SIZE) {
-
-                if (type !== BlockEnum.Water && neighbor === BlockEnum.Water)
-                    return null;
-
-                if (type !== BlockEnum.Leaves && neighbor === BlockEnum.Leaves)
-                    return null;
-                return neighbor;
-            }
-
             // check if voxel in chunk neighbor exists
-            if (neighbor !== null) {
-                if (type !== BlockEnum.Water && neighbor === BlockEnum.Water)
-                    return null;
+            if (type !== BlockEnum.Water && neighbor === BlockEnum.Water)
+                return null;
 
-                if (neighbor === BlockEnum.Leaves) return null;
+            if (neighbor === BlockEnum.Leaves) return null;
 
-                return neighbor;
-            }
-
-            return true;
+            return neighbor;
         }
     }
 
 const genGeometriesInfo = (params: IMatrixlizeDataParams) => {
     const matrix = matrixlizeData(params);
+    console.log(matrix, params);
     const voxels = params.data.voxels;
     const { x: cx, y: cy, z: cz } = params.data.position;
     const getVoxel = createVoxelGetter(matrix, cx, cy, cz);
@@ -256,14 +240,14 @@ const genGeometriesInfo = (params: IMatrixlizeDataParams) => {
 
 export const genGeometries = (params: IMatrixlizeDataParams) => {
     const taskId = nanoid();
-    console.time(`generate geometries-${taskId}`);
+    console.time(`generate geometries-${params.data.position.x},${params.data.position.y},${params.data.position.z}`);
 
     const {
         positions, normals, indices, uvs,
         t_positions, t_normals, t_indices, t_uvs
     } = genGeometriesInfo(params);
 
-    console.timeEnd(`generate geometries-${taskId}`);
+    console.timeEnd(`generate geometries-${params.data.position.x},${params.data.position.y},${params.data.position.z}`);
 
     const geometry = new BufferGeometry();
     const t_geometry = new BufferGeometry();

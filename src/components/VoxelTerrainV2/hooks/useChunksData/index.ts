@@ -5,7 +5,7 @@ import { IChunkData, IPosition } from '@/interface/chunks';
 
 import { createChunkData } from './createChunkData';
 
-const renderRange = 3;
+const renderRange = 2;
 
 function isInDistance(
     x0: number, y0: number, z0: number,

@@ -1,10 +1,36 @@
-import React, { useRef } from 'react'
-import { DoubleSide } from 'three';
+import React, { useMemo, useRef } from 'react'
+import { BoxHelper, DoubleSide, Mesh } from 'three';
 
 import { useBlockTexture } from '@/hooks/useBlockTexture';
 import { IChunkData } from '@/interface/chunks';
+import { CHUNK_SIZE } from '@/utils/Chunk';
 
 import { useGeometries } from './useGeometries';
+import { useHelper } from '@react-three/drei';
+
+type IDebugBorderProps = {
+    cx: number;
+    cy: number;
+    cz: number;
+};
+
+const DebugBorder = ({ cx, cy, cz }: IDebugBorderProps) => {
+    const ref = useRef<Mesh>(null);
+
+    useHelper(ref, BoxHelper, "#00ff00")
+
+    return (
+        <mesh
+            ref={ref}
+            position={
+                [cx * CHUNK_SIZE + 0.5 * CHUNK_SIZE,
+                cy * CHUNK_SIZE + 0.5 * CHUNK_SIZE,
+                cz * CHUNK_SIZE + 0.5 * CHUNK_SIZE]} >
+            <boxGeometry args={[32, 32, 32]} />
+            <meshPhongMaterial color="#ff0000" opacity={0.0} transparent />
+        </mesh >
+    );
+}
 
 type IProps = {
     data: IChunkData;
@@ -28,8 +54,8 @@ type IProps = {
     down?: IChunkData;
 };
 
-const Chunk: React.FC<IProps> = ({ data }) => {
-    const geometries = useGeometries({ data });
+const Chunk: React.FC<IProps> = ({ data, down, east, north, south, up, west }) => {
+    const geometries = useGeometries({ data, down, east, north, south, up, west });
     const { blockTexture } = useBlockTexture();
 
     const meshRef = useRef(null);
@@ -58,6 +84,10 @@ const Chunk: React.FC<IProps> = ({ data }) => {
                     opacity={1}
                 />
             </mesh>
+            <DebugBorder
+                cx={data.position.x}
+                cy={data.position.y}
+                cz={data.position.z} />
         </>
     );
 }

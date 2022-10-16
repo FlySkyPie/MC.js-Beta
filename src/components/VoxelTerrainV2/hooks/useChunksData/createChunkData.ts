@@ -63,13 +63,13 @@ export function createChunkData(cx: number, cy: number, cz: number, simplex: Noi
              * @todo Add water
              */
             // add water on land
-            if (altitude <= OCEAN_HEIGHT &&
-                OCEAN_HEIGHT >= cy * CHUNK_SIZE &&
-                OCEAN_HEIGHT < (cy + 1) * CHUNK_SIZE) {
-                for (let y = altitude; y <= OCEAN_HEIGHT; y++) {
-                    voxels[convertLocalPosition2ArrayIndex(x, y, z)] = BlockEnum.Water;
-                }
-            }
+            // if (altitude <= OCEAN_HEIGHT &&
+            //     OCEAN_HEIGHT >= cy * CHUNK_SIZE &&
+            //     OCEAN_HEIGHT < (cy + 1) * CHUNK_SIZE) {
+            //     for (let y = altitude; y <= OCEAN_HEIGHT; y++) {
+            //         voxels[convertLocalPosition2ArrayIndex(x, y, z)] = BlockEnum.Water;
+            //     }
+            // }
         }
     }
 
