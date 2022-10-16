@@ -8,6 +8,24 @@ import { useGeometries } from './useGeometries';
 
 type IProps = {
     data: IChunkData;
+
+    // x+1
+    north?: IChunkData;
+
+    // x-1
+    south?: IChunkData;
+
+    // z-1
+    west?: IChunkData;
+
+    // z+1
+    east?: IChunkData;
+
+    // y+1
+    up?: IChunkData;
+
+    // y-1
+    down?: IChunkData;
 };
 
 const Chunk: React.FC<IProps> = ({ data }) => {

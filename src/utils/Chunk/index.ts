@@ -26,3 +26,72 @@ const TREE_HEIGHT_DIFF = TREE_MAX_HEIGHT - TREE_MIN_HEIGHT;
 export const SAND_HEIGHT_DIFF = BEACH_HEIGHT - OCEAN_HEIGHT;
 export const DIRT_HEIGHT_DIFF = 4;
 const DIRT_HEIGHT_VARIATION = 2;
+
+export const VOXEL_FACES = [
+    {
+        //left
+        uvRow: 0,
+        dir: [-1, 0, 0],
+        vertices: [
+            { pos: [0, 1, 0], uv: [0, 1] },
+            { pos: [0, 0, 0], uv: [0, 0] },
+            { pos: [0, 1, 1], uv: [1, 1] },
+            { pos: [0, 0, 1], uv: [1, 0] },
+        ],
+    },
+    {
+        //right
+        uvRow: 0,
+        dir: [1, 0, 0],
+        vertices: [
+            { pos: [1, 1, 1], uv: [0, 1] },
+            { pos: [1, 0, 1], uv: [0, 0] },
+            { pos: [1, 1, 0], uv: [1, 1] },
+            { pos: [1, 0, 0], uv: [1, 0] },
+        ],
+    },
+    {
+        //bottom
+        uvRow: 1,
+        dir: [0, -1, 0],
+        vertices: [
+            { pos: [1, 0, 1], uv: [1, 0] },
+            { pos: [0, 0, 1], uv: [0, 0] },
+            { pos: [1, 0, 0], uv: [1, 1] },
+            { pos: [0, 0, 0], uv: [0, 1] },
+        ],
+    },
+    {
+        //top
+        uvRow: 2,
+        dir: [0, 1, 0],
+        vertices: [
+            { pos: [0, 1, 1], uv: [1, 1] },
+            { pos: [1, 1, 1], uv: [0, 1] },
+            { pos: [0, 1, 0], uv: [1, 0] },
+            { pos: [1, 1, 0], uv: [0, 0] },
+        ],
+    },
+    {
+        //back
+        uvRow: 0,
+        dir: [0, 0, -1],
+        vertices: [
+            { pos: [1, 0, 0], uv: [0, 0] },
+            { pos: [0, 0, 0], uv: [1, 0] },
+            { pos: [1, 1, 0], uv: [0, 1] },
+            { pos: [0, 1, 0], uv: [1, 1] },
+        ],
+    },
+    {
+        //front
+        uvRow: 0,
+        dir: [0, 0, 1],
+        vertices: [
+            { pos: [0, 0, 1], uv: [0, 0] },
+            { pos: [1, 0, 1], uv: [1, 0] },
+            { pos: [0, 1, 1], uv: [0, 1] },
+            { pos: [1, 1, 1], uv: [1, 1] },
+        ],
+    },
+];
