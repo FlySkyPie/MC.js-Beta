@@ -5,6 +5,7 @@ import { Color } from 'three';
 
 import { TimedSky, } from './components';
 import { VoxelTerrain } from './components/VoxelTerrainV2';
+import { DebugBlock } from './components/DebugBlock';
 import { GameCore } from './core/GameCore';
 import { useSystems } from './systems';
 
@@ -23,6 +24,9 @@ const App: React.FC = () => {
         {/* <pointLight position={[10, 10, 10]} /> */}
         <directionalLight color={new Color(0xffffff)} intensity={0.5} />
         <VoxelTerrain />
+        <DebugBlock x={16} y={27} z={-9} />
+        <DebugBlock x={15} y={27} z={-9} color="#00ffff" />
+        <axesHelper args={[64]} />
         <MapControls />
       </Canvas>
     </>

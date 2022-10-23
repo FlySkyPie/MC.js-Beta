@@ -5,6 +5,47 @@ export function convertLocalPosition2ArrayIndex(x: number, y: number, z: number)
     return x + CHUNK_SIZE * z + LAYER_SIZE * y;
 }
 
+type RelatedChunkDirection = [1 | 0 | -1, 1 | 0 | -1, 1 | 0 | -1];
+export function convertLocalPosition2ChunkShiftAndArrayIndex(localX: number, localY: number, localZ: number) {
+    const dir: RelatedChunkDirection = [0, 0, 0];
+    let _x = localX, _y = localY, _z = localZ;
+
+    if (localX >= CHUNK_SIZE) {
+        dir[0] = 1;
+        _x = _x % CHUNK_SIZE;
+    } else if (localX < 0) {
+        dir[0] = -1;
+        _x += CHUNK_SIZE;
+    }
+
+    if (localY >= CHUNK_SIZE) {
+        dir[1] = 1;
+        _y = _y % CHUNK_SIZE;
+    } else if (localY < 0) {
+        dir[1] = -1;
+        _y += CHUNK_SIZE;
+    }
+
+    if (localZ >= CHUNK_SIZE) {
+        dir[2] = 1;
+        _z = _z % CHUNK_SIZE;
+    } else if (localZ < 0) {
+        dir[2] = -1;
+        _z += CHUNK_SIZE;
+    }
+
+    if (dir[0] === 0 && dir[1] === 0 && dir[2] === 0) {
+        throw new Error('This funtion should only used to find neighbor voxel.')
+    }
+
+    return {
+        dir,
+        index: _x + CHUNK_SIZE * _z + LAYER_SIZE * _y,
+        // Debug
+        _x, _y, _z,
+    }
+}
+
 export const BEACH_HEIGHT = 52;
 const TREE_MIN_HEIGHT = 4;
 const TREE_MAX_HEIGHT = 6;

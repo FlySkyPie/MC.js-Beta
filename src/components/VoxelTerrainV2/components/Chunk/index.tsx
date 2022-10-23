@@ -1,12 +1,12 @@
 import React, { useMemo, useRef } from 'react'
 import { BoxHelper, DoubleSide, Mesh } from 'three';
+import { useHelper } from '@react-three/drei';
 
 import { useBlockTexture } from '@/hooks/useBlockTexture';
 import { IChunkData } from '@/interface/chunks';
 import { CHUNK_SIZE } from '@/utils/Chunk';
 
 import { useGeometries } from './useGeometries';
-import { useHelper } from '@react-three/drei';
 
 type IDebugBorderProps = {
     cx: number;
@@ -26,7 +26,7 @@ const DebugBorder = ({ cx, cy, cz }: IDebugBorderProps) => {
                 [cx * CHUNK_SIZE + 0.5 * CHUNK_SIZE,
                 cy * CHUNK_SIZE + 0.5 * CHUNK_SIZE,
                 cz * CHUNK_SIZE + 0.5 * CHUNK_SIZE]} >
-            <boxGeometry args={[32, 32, 32]} />
+            <boxGeometry args={[CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE]} />
             <meshPhongMaterial color="#ff0000" opacity={0.0} transparent />
         </mesh >
     );

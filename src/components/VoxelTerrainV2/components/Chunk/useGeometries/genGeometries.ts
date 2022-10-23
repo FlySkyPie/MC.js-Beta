@@ -2,7 +2,10 @@ import { BufferAttribute, BufferGeometry } from "three";
 import { nanoid } from 'nanoid'
 
 import { BlockEnum, convertBlockType2TextureId } from '@/utils/BlockTable';
-import { convertLocalPosition2ArrayIndex, CHUNK_SIZE, VOXEL_FACES } from '@/utils/Chunk';
+import {
+    CHUNK_SIZE, VOXEL_FACES, convertLocalPosition2ChunkShiftAndArrayIndex,
+    convertLocalPosition2ArrayIndex,
+} from '@/utils/Chunk';
 import { IChunkData } from '@/interface/chunks';
 
 const TILE_SIZE = 16;
@@ -11,6 +14,11 @@ const TILE_TEXTURE_HEIGHT = 64;
 
 type INeighborChunkData = Uint32Array | undefined;
 
+// ⎛none none none⎞  ⎛none -y none⎞  ⎛none none none⎞
+// ⎜              ⎟  ⎜            ⎟  ⎜              ⎟
+// ⎜none  -x  none⎟  ⎜ -z   0  +z ⎟  ⎜none  +x  none⎟
+// ⎜              ⎟  ⎜            ⎟  ⎜              ⎟
+// ⎝none none none⎠  ⎝none +y none⎠  ⎝none none none⎠
 type IMatrixData = [
     [
         [undefined, undefined, undefined],
@@ -54,31 +62,6 @@ export const matrixlizeData = ({ data, down, east, north, south, up, west }: IMa
     ],
 ];
 
-type RelatedChunkDirection = [1 | 0 | -1, 1 | 0 | -1, 1 | 0 | -1];
-const createRelatedChunkDirectionGetter = (baseX: number, baseY: number, baseZ: number,) =>
-    (x: number, y: number, z: number) => {
-        const value: RelatedChunkDirection = [0, 0, 0];
-        if (x >= baseX + CHUNK_SIZE) {
-            value[0] = 1;
-        } else if (x < baseX) {
-            value[0] = -1;
-        }
-
-        if (y >= baseY + CHUNK_SIZE) {
-            value[1] = 1;
-        } else if (y < baseY) {
-            value[1] = -1;
-        }
-
-        if (z >= baseZ + CHUNK_SIZE) {
-            value[2] = 1;
-        } else if (z < baseZ) {
-            value[2] = -1;
-        }
-
-        return value;
-    }
-
 const createVoxelGetter =
     (matrix: IMatrixData, cx: number, cy: number, cz: number) => {
         const baseX = CHUNK_SIZE * cx;
@@ -94,24 +77,23 @@ const createVoxelGetter =
             if (localX >= 0 && localX < CHUNK_SIZE &&
                 localY >= 0 && localY < CHUNK_SIZE &&
                 localZ >= 0 && localZ < CHUNK_SIZE) {
-                const neighbor = matrix[1][1][1][convertLocalPosition2ArrayIndex(localX, localY, localZ)];
-                if (type !== BlockEnum.Water && neighbor === BlockEnum.Water)
+                const voxel = matrix[1][1][1][convertLocalPosition2ArrayIndex(localX, localY, localZ)];
+                if (type !== BlockEnum.Water && voxel === BlockEnum.Water)
                     return null;
 
-                if (type !== BlockEnum.Leaves && neighbor === BlockEnum.Leaves)
+                if (type !== BlockEnum.Leaves && voxel === BlockEnum.Leaves)
                     return null;
-                return neighbor;
+                return voxel;
             }
 
-            const getDir = createRelatedChunkDirectionGetter(baseX, baseY, baseZ);
+            const { dir, index } = convertLocalPosition2ChunkShiftAndArrayIndex(localX, localY, localZ);
 
-            const dir = getDir(vx, vy, vz);
             const neighborChunk = matrix[1 + dir[0]][1 + dir[1]][1 + dir[2]];
             if (neighborChunk === undefined) {
                 return null;
             }
 
-            const neighbor = neighborChunk[convertLocalPosition2ArrayIndex(localX, localY, localZ)];
+            const neighbor = neighborChunk[index];
 
             // check if voxel in chunk neighbor exists
             if (type !== BlockEnum.Water && neighbor === BlockEnum.Water)
@@ -125,7 +107,7 @@ const createVoxelGetter =
 
 const genGeometriesInfo = (params: IMatrixlizeDataParams) => {
     const matrix = matrixlizeData(params);
-    console.log(matrix, params);
+    //console.log(matrix, params);
     const voxels = params.data.voxels;
     const { x: cx, y: cy, z: cz } = params.data.position;
     const getVoxel = createVoxelGetter(matrix, cx, cy, cz);
@@ -140,9 +122,6 @@ const genGeometriesInfo = (params: IMatrixlizeDataParams) => {
     const t_indices = [];
     const t_uvs: number[] = [];
 
-    const taskId = nanoid();
-
-    // console.log("BEGIN: " + cx + "," + cz + " " + performance.now())
     for (let y = 0; y < CHUNK_SIZE; ++y) {
         const vy = cy * CHUNK_SIZE + y;
         for (let z = 0; z < CHUNK_SIZE; ++z) {
@@ -239,15 +218,15 @@ const genGeometriesInfo = (params: IMatrixlizeDataParams) => {
 
 
 export const genGeometries = (params: IMatrixlizeDataParams) => {
-    const taskId = nanoid();
-    console.time(`generate geometries-${params.data.position.x},${params.data.position.y},${params.data.position.z}`);
+    //const taskId = nanoid();
+    //console.time(`generate geometries-${params.data.position.x},${params.data.position.y},${params.data.position.z}`);
 
     const {
         positions, normals, indices, uvs,
         t_positions, t_normals, t_indices, t_uvs
     } = genGeometriesInfo(params);
 
-    console.timeEnd(`generate geometries-${params.data.position.x},${params.data.position.y},${params.data.position.z}`);
+    //console.timeEnd(`generate geometries-${params.data.position.x},${params.data.position.y},${params.data.position.z}`);
 
     const geometry = new BufferGeometry();
     const t_geometry = new BufferGeometry();
