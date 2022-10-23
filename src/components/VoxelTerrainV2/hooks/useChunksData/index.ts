@@ -7,13 +7,11 @@ import { createChunkData } from './createChunkData';
 
 const renderRange = 4;
 
-function isInDistance(
+function getSquaredDistance(
     x0: number, y0: number, z0: number,
-    x1: number, y1: number, z1: number,
-    range: number) {
-    return ((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1) + (z0 - z1) * (z0 - z1)) < range * range
+    x1: number, y1: number, z1: number) {
+    return ((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1) + (z0 - z1) * (z0 - z1))
 }
-
 type IProps = {
     cx: number;
     cy: number;
@@ -23,18 +21,22 @@ type IProps = {
 export const useChunksData = ({ cx, cy, cz }: IProps) => {
     const { simplex } = useSimplexNoise();
 
-    const chunkPositions = useMemo(() => {
-        const positions: IPosition[] = [];
+    const chunkPositions = useMemo<IPosition[]>(() => {
+        const positions: (IPosition & { squaredDistance: number })[] = [];
+        const squaredRange = renderRange * renderRange;
 
         for (let x = cx - renderRange; x <= cx + renderRange; x++) {
             for (let y = cy - renderRange; y <= cy + renderRange; y++) {
                 for (let z = cz - renderRange; z <= cz + renderRange; z++) {
-                    if (isInDistance(cx, cy, cz, x, y, z, renderRange)) {
-                        positions.push({ x, y, z });
+                    const squaredDistance = getSquaredDistance(cx, cy, cz, x, y, z);
+                    if (squaredDistance < squaredRange) {
+                        positions.push({ x, y, z, squaredDistance });
                     }
                 }
             }
         }
+
+        positions.sort((a, b) => a.squaredDistance - b.squaredDistance)
 
         //debug
         // positions.length = 0;

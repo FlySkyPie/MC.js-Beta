@@ -84,10 +84,10 @@ const Chunk: React.FC<IProps> = ({ data, down, east, north, south, up, west }) =
                     opacity={1}
                 />
             </mesh>
-            <DebugBorder
+            {/* <DebugBorder
                 cx={data.position.x}
                 cy={data.position.y}
-                cz={data.position.z} />
+                cz={data.position.z} /> */}
         </>
     );
 }

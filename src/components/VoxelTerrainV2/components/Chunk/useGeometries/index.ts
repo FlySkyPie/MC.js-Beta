@@ -3,7 +3,7 @@ import { BufferGeometry } from "three";
 
 import { IChunkData } from '@/interface/chunks';
 
-import { genGeometries } from './genGeometries';
+import { genGeometriesAsyc } from './genGeometriesAsyc';
 
 type IProps = {
     data: IChunkData;
@@ -20,8 +20,10 @@ export const useGeometries = ({ data, down, east, north, south, up, west }: IPro
     const [geometries, setGeometries] = useState<{ geometry: BufferGeometry, t_geometry: BufferGeometry }>();
 
     useEffect(() => {
-        const item = genGeometries({ data, down, east, north, south, up, west });
-        setGeometries(item);
+        genGeometriesAsyc({ data, down, east, north, south, up, west }).then(item=>{
+            setGeometries(item);
+        });
+      
     }, [data, down, east, north, south, up, west]);
 
     return geometries;

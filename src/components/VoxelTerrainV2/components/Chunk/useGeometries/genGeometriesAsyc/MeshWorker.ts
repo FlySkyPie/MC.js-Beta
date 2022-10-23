@@ -1,6 +1,3 @@
-import { BufferAttribute, BufferGeometry } from "three";
-import { nanoid } from 'nanoid'
-
 import { BlockEnum, convertBlockType2TextureId } from '@/utils/BlockTable';
 import {
     CHUNK_SIZE, VOXEL_FACES, convertLocalPosition2ChunkShiftAndArrayIndex,
@@ -107,7 +104,6 @@ const createVoxelGetter =
 
 const genGeometriesInfo = (params: IMatrixlizeDataParams) => {
     const matrix = matrixlizeData(params);
-    //console.log(matrix, params);
     const voxels = params.data.voxels;
     const { x: cx, y: cy, z: cz } = params.data.position;
     const getVoxel = createVoxelGetter(matrix, cx, cy, cz);
@@ -130,12 +126,9 @@ const genGeometriesInfo = (params: IMatrixlizeDataParams) => {
                 const vx = cx * CHUNK_SIZE + x;
                 const voxel = voxels[convertLocalPosition2ArrayIndex(x, y, z)];
 
-                // 
                 if (!voxel) {
                     continue;
                 }
-
-                // get neighbors of current voxel if it exists
 
                 // iterate through every faces to get neighbors
                 for (const { uvRow, dir, vertices } of VOXEL_FACES) {
@@ -183,7 +176,6 @@ const genGeometriesInfo = (params: IMatrixlizeDataParams) => {
 
                     }
                     /*
-
                         quad index, triangles created by connecting vertex index in clockwise order
 
                         triangle (0,1,2) forms first triangle
@@ -216,43 +208,12 @@ const genGeometriesInfo = (params: IMatrixlizeDataParams) => {
     };
 }
 
-/**
- * @deprecated
- */
-export const genGeometries = (params: IMatrixlizeDataParams) => {
-    //const taskId = nanoid();
-    //console.time(`generate geometries-${params.data.position.x},${params.data.position.y},${params.data.position.z}`);
+type IPrams = { id: string } & IMatrixlizeDataParams;
 
-    const {
-        positions, normals, indices, uvs,
-        t_positions, t_normals, t_indices, t_uvs
-    } = genGeometriesInfo(params);
 
-    //console.timeEnd(`generate geometries-${params.data.position.x},${params.data.position.y},${params.data.position.z}`);
-
-    const geometry = new BufferGeometry();
-    const t_geometry = new BufferGeometry();
-
-    //set positions, normals, and indices into BufferGeometry
-    const positionNumComponents = 3;
-    const normalNumComponents = 3;
-    const uvNumComponents = 2;
-    geometry.setAttribute(
-        "position",
-        new BufferAttribute(new Float32Array(positions), positionNumComponents)
-    );
-    geometry.setAttribute("normal", new BufferAttribute(new Float32Array(normals), normalNumComponents));
-    geometry.setAttribute("uv", new BufferAttribute(new Float32Array(uvs), uvNumComponents));
-    geometry.setIndex(indices);
-
-    t_geometry.setAttribute(
-        "position",
-        new BufferAttribute(new Float32Array(t_positions), positionNumComponents)
-    );
-    t_geometry.setAttribute("normal", new BufferAttribute(new Float32Array(t_normals), normalNumComponents));
-    t_geometry.setAttribute("uv", new BufferAttribute(new Float32Array(t_uvs), uvNumComponents));
-    const size = t_positions.length / 3;
-    t_geometry.setIndex(t_indices.filter(v => v < size));
-
-    return { geometry, t_geometry };
-};
+// @ts-ignore
+self.addEventListener('message', function (e) {
+    const { id, ...params } = e.data as IPrams;
+    const result = genGeometriesInfo(params);
+    self.postMessage({ id, result });
+}, false);

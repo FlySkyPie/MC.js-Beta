@@ -1,2 +1,3 @@
 export * from './TimedSky';
-export * from './VoxelTerrain';
+export * from './VoxelTerrainV2';
+export * from './DebugBlock';

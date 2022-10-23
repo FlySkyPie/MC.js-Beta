@@ -3,9 +3,7 @@ import { Canvas, } from '@react-three/fiber';
 import { MapControls, } from '@react-three/drei';
 import { Color } from 'three';
 
-import { TimedSky, } from './components';
-import { VoxelTerrain } from './components/VoxelTerrainV2';
-import { DebugBlock } from './components/DebugBlock';
+import { TimedSky, VoxelTerrain, } from './components';
 import { GameCore } from './core/GameCore';
 import { useSystems } from './systems';
 
@@ -24,9 +22,9 @@ const App: React.FC = () => {
         {/* <pointLight position={[10, 10, 10]} /> */}
         <directionalLight color={new Color(0xffffff)} intensity={0.5} />
         <VoxelTerrain />
-        <DebugBlock x={16} y={27} z={-9} />
+        {/* <DebugBlock x={16} y={27} z={-9} />
         <DebugBlock x={15} y={27} z={-9} color="#00ffff" />
-        <axesHelper args={[64]} />
+        <axesHelper args={[64]} /> */}
         <MapControls />
       </Canvas>
     </>
