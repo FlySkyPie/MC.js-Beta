@@ -115,7 +115,7 @@ const genGeometriesInfo = (params: IMatrixlizeDataParams) => {
 
     const t_positions: number[] = [];
     const t_normals: number[] = [];
-    const t_indices = [];
+    const t_indices: number[] = [];
     const t_uvs: number[] = [];
 
     for (let y = 0; y < CHUNK_SIZE; ++y) {
@@ -130,6 +130,22 @@ const genGeometriesInfo = (params: IMatrixlizeDataParams) => {
                     continue;
                 }
 
+                /**
+                    quad index, triangles created by connecting vertex index in clockwise order
+
+                    triangle (0,1,2) forms first triangle
+                    triangle (2,1,3) forms second triangle
+
+                    ( 1 )-------( 3 )
+                        |\          |
+                        |  \        |
+                        |    \      |
+                        |      \    |
+                        |        \  |
+                        |          \|
+                    ( 0 )-------( 2 )
+                 */
+
                 // iterate through every faces to get neighbors
                 for (const { uvRow, dir, vertices } of VOXEL_FACES) {
                     const neighbor = getVoxel(vx + dir[0], vy + dir[1], vz + dir[2], voxel);
@@ -142,10 +158,11 @@ const genGeometriesInfo = (params: IMatrixlizeDataParams) => {
 
                     // divide index by three to get index of vertex
                     const ndx = positions.length / 3;
+                    const t_ndx = t_positions.length / 3;
 
                     //add to arrays for BufferGeometry
-                    for (const { pos, uv } of vertices) {
-                        if ((voxel & 0x000000ff) === 0x000000ff) {
+                    if ((voxel & 0x000000ff) === 0x000000ff) {
+                        for (const { pos, uv } of vertices) {
                             positions.push(vx + pos[0], vy + pos[1], vz + pos[2]);
 
                             normals.push(...dir);
@@ -156,47 +173,30 @@ const genGeometriesInfo = (params: IMatrixlizeDataParams) => {
                                 ((uvRow + 1 - uv[1]) * TILE_SIZE) /
                                 TILE_TEXTURE_HEIGHT
                             );
-                            continue;
                         }
-
-                        if (voxel === BlockEnum.Water) {
-                            t_positions.push(vx + pos[0], vy + pos[1] - 0.1, vz + pos[2]);
-                        } else {
-                            t_positions.push(vx + pos[0], vy + pos[1], vz + pos[2]);
-                        }
-
-                        t_normals.push(...dir);
-                        t_uvs.push(
-                            ((convertBlockType2TextureId(voxel) + uv[0]) * TILE_SIZE) /
-                            TILE_TEXTURE_WIDTH,
-                            1 -
-                            ((uvRow + 1 - uv[1]) * TILE_SIZE) /
-                            TILE_TEXTURE_HEIGHT
-                        );
-
-                    }
-                    /*
-                        quad index, triangles created by connecting vertex index in clockwise order
-
-                        triangle (0,1,2) forms first triangle
-                        triangle (2,1,3) forms second triangle
-
-                        ( 1 )-------( 3 )
-                          |\          |
-                          |  \        |
-                          |    \      |
-                          |      \    |
-                          |        \  |
-                          |          \|
-                        ( 0 )-------( 2 )
-
-                        */
-
-                    if (voxel !== BlockEnum.Water &&
-                        voxel !== BlockEnum.Leaves) {
                         indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
                     }
-                    t_indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
+
+                    if (voxel !== 0 && (voxel & 0x000000ff) !== 0x000000ff) {
+                        for (const { pos, uv } of vertices) {
+                            if (voxel === BlockEnum.Water) {
+                                t_positions.push(vx + pos[0], vy + pos[1] - 0.1, vz + pos[2]);
+                            } else {
+                                t_positions.push(vx + pos[0], vy + pos[1], vz + pos[2]);
+                            }
+
+                            t_normals.push(...dir);
+                            t_uvs.push(
+                                ((convertBlockType2TextureId(voxel) + uv[0]) * TILE_SIZE) /
+                                TILE_TEXTURE_WIDTH,
+                                1 -
+                                ((uvRow + 1 - uv[1]) * TILE_SIZE) /
+                                TILE_TEXTURE_HEIGHT
+                            );
+
+                        }
+                        t_indices.push(t_ndx, t_ndx + 1, t_ndx + 2, t_ndx + 2, t_ndx + 1, t_ndx + 3);
+                    }
                 }
             }
         }

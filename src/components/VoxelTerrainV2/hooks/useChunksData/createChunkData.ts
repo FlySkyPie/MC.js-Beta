@@ -44,9 +44,6 @@ export function createChunkData(cx: number, cy: number, cz: number, simplex: Noi
                 e += (1 / octave) * simplex(octave * vx * DEFAULT_FREQUENCY * 1, octave * vz * DEFAULT_FREQUENCY * 1);
             }
 
-            // TERRACES
-            // e = Math.round(e * levels)/levels;
-
             // REDISTRIBUTION
             e = Math.exp(e);
 
@@ -56,20 +53,15 @@ export function createChunkData(cx: number, cy: number, cz: number, simplex: Noi
 
             for (let y = 0; y < CHUNK_SIZE; y++) {
                 const vy = cy * CHUNK_SIZE + y;
-                voxels[convertLocalPosition2ArrayIndex(x, y, z)] = getBlockType(altitude, vy);
-            }
+                const voxel = getBlockType(altitude, vy);
+                const index = convertLocalPosition2ArrayIndex(x, y, z);
 
-            /**
-             * @todo Add water
-             */
-            // add water on land
-            // if (altitude <= OCEAN_HEIGHT &&
-            //     OCEAN_HEIGHT >= cy * CHUNK_SIZE &&
-            //     OCEAN_HEIGHT < (cy + 1) * CHUNK_SIZE) {
-            //     for (let y = altitude; y <= OCEAN_HEIGHT; y++) {
-            //         voxels[convertLocalPosition2ArrayIndex(x, y, z)] = BlockEnum.Water;
-            //     }
-            // }
+                voxels[index] = voxel;
+
+                if (y <= OCEAN_HEIGHT && voxel === BlockEnum.Air) {
+                    voxels[index] = BlockEnum.Water;
+                }
+            }
         }
     }
 

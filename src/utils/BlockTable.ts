@@ -5,10 +5,10 @@ export enum BlockEnum {
     Dirt = 0x72523aff,
     Rock = 0x666666ff,
     Grass = 0x6b903bff,
-    Leaves = 0x566e48ff,
+    Leaves = 0x566e4866,
     Log = 0x806632ff,
     Sand = 0xddac80ff,
-    Water = 0x18b0dcff,
+    Water = 0x18b0dc66,
     Plank = 0x715644ff,
 };
 

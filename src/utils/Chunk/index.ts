@@ -60,7 +60,7 @@ const LEVELS = 12;
 
 // TERRAIN VALUES
 export const BASE_HEIGHT = 0;
-export const OCEAN_HEIGHT = 50;
+export const OCEAN_HEIGHT = 16;
 
 const TREE_Y_CUTOFF = BEACH_HEIGHT + 3;
 const TREE_HEIGHT_DIFF = TREE_MAX_HEIGHT - TREE_MIN_HEIGHT;

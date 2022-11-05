@@ -71,7 +71,7 @@ const Chunk: React.FC<IProps> = ({ data, down, east, north, south, up, west }) =
                     map={blockTexture}
                     transparent={false}
                     depthTest
-                    needsUpdate
+                    //needsUpdate
                     alphaTest={0.5}
                 />
             </mesh>
@@ -79,15 +79,14 @@ const Chunk: React.FC<IProps> = ({ data, down, east, north, south, up, west }) =
                 <meshPhongMaterial
                     map={blockTexture}
                     transparent
-                    needsUpdate
-                    side={DoubleSide}
+                    //needsUpdate
                     opacity={1}
                 />
             </mesh>
-            {/* <DebugBorder
+            <DebugBorder
                 cx={data.position.x}
                 cy={data.position.y}
-                cz={data.position.z} /> */}
+                cz={data.position.z} />
         </>
     );
 }

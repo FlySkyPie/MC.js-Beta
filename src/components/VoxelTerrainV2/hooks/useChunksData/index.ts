@@ -4,13 +4,17 @@ import { useSimplexNoise } from "@/contexts/SimplexNoiseContext";
 import { IChunkData, IPosition } from '@/interface/chunks';
 
 import { createChunkData } from './createChunkData';
+// import { genBlob } from "./genBlob";
 
-const renderRange = 4;
+const renderRange = 2;
 
 function getSquaredDistance(
     x0: number, y0: number, z0: number,
     x1: number, y1: number, z1: number) {
-    return ((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1) + (z0 - z1) * (z0 - z1))
+    if (y1 > y0) {
+        return ((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1) + (z0 - z1) * (z0 - z1))
+    }
+    return ((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1) * 4 + (z0 - z1) * (z0 - z1))
 }
 type IProps = {
     cx: number;
@@ -40,7 +44,7 @@ export const useChunksData = ({ cx, cy, cz }: IProps) => {
 
         //debug
         // positions.length = 0;
-        // positions.push({ x: 0, y: 0, z: 0 });
+        // positions.push({ x: 0, y: 0, z: 0, squaredDistance: 0 });
 
         return positions;
     }, [cx, cy, cz]);
@@ -53,6 +57,12 @@ export const useChunksData = ({ cx, cy, cz }: IProps) => {
 
         chunkPositions.forEach(({ x, y, z }) => {
             const data = createChunkData(x, y, z, simplex);
+
+            // Debug
+            // if (x === 0 && y === 0 && z === 0) {
+            //     genBlob(data.voxels);
+            // }
+
             chunksMap.set(`${x},${y},${z}`, data);
         })
 
